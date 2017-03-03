@@ -1,6 +1,6 @@
-import sp_api_connector
+import sailplay_api
 
-api_connector = sp_api_connector.api_connector(XXXX, XXXXXXXX, XXXX)
+api_connector = sailplay_api.api_connector(XXXX, XXXXXXXX, XXXX)
 
 print("Logging in")
 token = api_connector.login()
