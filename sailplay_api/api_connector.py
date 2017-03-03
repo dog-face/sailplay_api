@@ -132,3 +132,43 @@ class api_connector(object):
 		except Exception as e:
 			logging.critical("users_add: Exception: [%s]" % e)
 			return False
+	
+	def points_add(self, points, origin_user_id=None, phone=None, email=None, comment=None, order_num=None):
+		try:
+			
+			url_params = {
+				'token': self.token,
+				'store_department_id': self.dep_id,
+				'origin_user_id': origin_user_id,
+				'points': points
+			}
+			
+			if origin_user_id is not None:
+				url_params['origin_user_id'] = origin_user_id
+			elif phone is not None:
+				url_params['phone'] = phone
+			elif email is not None:
+				url_params['email'] = email
+			if comment is not None:
+				url_params['comment'] = comment
+			if order_num is not None:
+				url_params['order_num'] = order_num
+			
+			url_params = encode(url_params)
+			
+			request = "%s/api/v2/points/add/?%s" % (self.sailplay_domain, url_params)
+			
+			data = open(request).read().decode("utf-8")
+			response_json = json.loads(data)
+			
+			if response_json[u'status'] == u'ok':
+				logging.info("points_add: [%s] points added [%s]" % (points, request))
+				return response_json
+			else:
+				logging.error("points_add: Error: [%s] points not added: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		except Exception as e:
+			logging.critical("points_add: Exception: [%s]" % e)
+			return False
