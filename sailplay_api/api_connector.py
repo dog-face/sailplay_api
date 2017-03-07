@@ -132,6 +132,60 @@ class api_connector(object):
 		except Exception as e:
 			logging.critical("users_add: Exception: [%s]" % e)
 			return False
+		
+	def users_update(self, origin_user_id=None, phone=None, email=None, first_name=None, middle_name=None, last_name=None,
+				  birth_date=None, sex=None, add_phone=None, add_email=None, new_phone=None, new_email= None):
+		try:
+			
+			url_params = {
+				'token': self.token,
+				'store_department_id': self.dep_id,
+				'origin_user_id': origin_user_id,
+			}
+			
+			if origin_user_id is not None:
+				url_params['origin_user_id'] = origin_user_id
+			if phone is not None:
+				url_params['phone'] = phone
+			if email is not None:
+				url_params['email'] = email
+			if first_name is not None:
+				url_params['first_name'] = first_name
+			if middle_name is not None:
+				url_params['middle_name'] = middle_name
+			if last_name is not None:
+				url_params['last_name'] = last_name
+			if birth_date is not None:
+				url_params['birth_date'] = birth_date
+			if sex is not None:
+				url_params['sex'] = sex
+			if add_phone is not None:
+				url_params['add_phone'] = add_phone
+			if add_email is not None:
+				url_params['add_email'] = add_email
+			if new_phone is not None:
+				url_params['new_phone'] = new_phone
+			if new_email is not None:
+				url_params['new_email'] = new_email
+			
+			url_params = encode(url_params)
+			
+			request = "%s/api/v2/users/update/?%s" % (self.sailplay_domain, url_params)
+			
+			data = open(request).read().decode("utf-8")
+			response_json = json.loads(data)
+			
+			if response_json[u'status'] == u'ok':
+				logging.info("users_update: updated [%s]" % request)
+				return response_json
+			else:
+				logging.error("users_update: Error: [%s] not updated: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		except Exception as e:
+			logging.critical("users_update: Exception: [%s]" % e)
+			return False
 	
 	def points_add(self, points, origin_user_id=None, phone=None, email=None, comment=None, order_num=None):
 		try:
