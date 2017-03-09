@@ -186,14 +186,50 @@ class api_connector(object):
 		except Exception as e:
 			logging.critical("users_update: Exception: [%s]" % e)
 			return False
-	
-	def points_add(self, points, origin_user_id=None, phone=None, email=None, comment=None, order_num=None):
+		
+		
+	def purchases_new(self, order_num, cart, origin_user_id=None, phone=None, email=None):
 		try:
-			
 			url_params = {
 				'token': self.token,
 				'store_department_id': self.dep_id,
-				'origin_user_id': origin_user_id,
+				'pin_code': self.pin_code,
+				'order_num': order_num,
+				'cart': cart
+			}
+			
+			if origin_user_id is not None:
+				url_params['origin_user_id'] = origin_user_id
+			elif phone is not None:
+				url_params['phone'] = phone
+			elif email is not None:
+				url_params['email'] = email
+			
+			url_params = encode(url_params)
+			
+			request = "%s/api/v2/purchases/new/?%s" % (self.sailplay_domain, url_params)
+			
+			data = open(request).read().decode("utf-8")
+			response_json = json.loads(data)
+			
+			if response_json[u'status'] == u'ok':
+				logging.info("purchases_new: [%s] purchase added [%s]" % (order_num, request))
+				return response_json
+			else:
+				logging.error("purchases_new: Error: [%s] purchase not added: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		
+		except Exception as e:
+			logging.critical("purchases_new: Exception: [%s]" % e)
+			return False
+	
+	def points_add(self, points, origin_user_id=None, phone=None, email=None, comment=None, order_num=None):
+		try:
+			url_params = {
+				'token': self.token,
+				'store_department_id': self.dep_id,
 				'points': points
 			}
 			
@@ -226,3 +262,15 @@ class api_connector(object):
 		except Exception as e:
 			logging.critical("points_add: Exception: [%s]" % e)
 			return False
+		
+	#Convert a dictionart of the form {sku: {sku, quantity, price}, sku: {sku, quantity, price}, ...} into a valid cart string
+	def to_cart(self, cart_dict):
+		index = 1
+		cart_string = "{"
+		for sku in cart_dict:
+			this_item = cart_dict[sku]
+			cart_string += "\"" + str(index) + "\":{\"sku\":\"" + str(sku) + "\",\"quantity\":" + \
+						   str(this_item['quantity']) + ",\"price\":" + str(this_item['price']) + "},"
+			index += 1
+		cart_string = cart_string[:-1] + "}" # Trim last "," and close braces
+		return cart_string
