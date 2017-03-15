@@ -195,7 +195,7 @@ class api_connector(object):
 				'token': self.token,
 				'store_department_id': self.dep_id,
 				'origin_user_id': origin_user_id,
-				'tags': tags.join(",")
+				'tags': ",".join(tags)
 			}
 			
 			if origin_user_id is not None:
