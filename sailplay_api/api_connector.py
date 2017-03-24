@@ -187,6 +187,7 @@ class api_connector(object):
 			logging.critical("users_update: Exception: [%s]" % e)
 			return False
 		
+		
 	#  Provide tags as a list
 	def users_tags_add(self, tags, origin_user_id=None, phone=None, email=None):
 		try:
@@ -223,6 +224,43 @@ class api_connector(object):
 		except Exception as e:
 			logging.critical("users_tags_add: Exception: [%s]" % e)
 			return False
+			
+	#  Provide tags as a list
+	def users_tags_delete(self, tags, origin_user_id=None, phone=None, email=None):
+		try:
+			
+			url_params = {
+				'token': self.token,
+				'store_department_id': self.dep_id,
+				'tags': ",".join(tags)
+			}
+			
+			if origin_user_id is not None:
+				url_params['origin_user_id'] = origin_user_id
+			if phone is not None:
+				url_params['phone'] = phone
+			if email is not None:
+				url_params['email'] = email
+			
+			url_params = encode(url_params)
+			
+			request = "%s/api/v2/users/tags/delete/?%s" % (self.sailplay_domain, url_params)
+			
+			data = open(request).read().decode("utf-8")
+			response_json = json.loads(data)
+			
+			if response_json[u'status'] == u'ok':
+				logging.info("users_tags_delete: updated [%s]" % request)
+				return response_json
+			else:
+				logging.error("users_tags_delete: Error: [%s] not updated: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		except Exception as e:
+			logging.critical("users_tags_delete: Exception: [%s]" % e)
+			return False
+		
 		
 	def purchases_new(self, order_num, cart, origin_user_id=None, phone=None, email=None):
 		try:
