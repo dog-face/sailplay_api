@@ -189,7 +189,7 @@ class api_connector(object):
 		
 		
 	#  Provide tags as a list
-	def users_tags_add(self, tags, origin_user_id=None, phone=None, email=None):
+	def users_tags_add(self, tags, origin_user_id=None, phone=None, email=None, language=None):
 		try:
 			
 			url_params = {
@@ -205,6 +205,8 @@ class api_connector(object):
 				url_params['phone'] = phone
 			if email is not None:
 				url_params['email'] = email
+			if language is not None:
+				url_params['language'] = language
 			
 			url_params = encode(url_params)
 			

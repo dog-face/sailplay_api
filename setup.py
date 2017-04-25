@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='sailplay_api',
-	  version='0.3.2',
+	  version='0.3.3',
 	  description='A Python wrapper for the SailPlay API',
 	  url='https://github.com/mznco/sailplay_api',
 	  author='mznco',
