@@ -352,11 +352,11 @@ class api_connector(object):
 			
 			if name is not None:
 				url_params['name'] = name
-			elif phone is not None:
+			if price is not None:
 				url_params['price'] = price
-			elif email is not None:
+			if category_sku is not None:
 				url_params['category_sku'] = category_sku
-			if comment is not None:
+			if points_rate is not None:
 				url_params['points_rate'] = points_rate
 			
 			url_params = encode(url_params)
@@ -388,11 +388,11 @@ class api_connector(object):
 			
 			if name is not None:
 				url_params['name'] = name
-			elif phone is not None:
+			if price is not None:
 				url_params['price'] = price
-			elif email is not None:
+			if category_sku is not None:
 				url_params['category_sku'] = category_sku
-			if comment is not None:
+			if points_rate is not None:
 				url_params['points_rate'] = points_rate
 			
 			url_params = encode(url_params)
@@ -423,7 +423,6 @@ class api_connector(object):
 				'attribute_sku': attribute_sku,
 				'value_sku': value_sku
 			}
-			
 			
 			url_params = encode(url_params)
 			
@@ -472,6 +471,78 @@ class api_connector(object):
 		
 		except Exception as e:
 			logging.critical("products_attributes_edit: Exception: [%s]" % e)
+			return False
+		
+	def products_categories_add(self, sku, parent_sku=None, name=None, pic=None, points_rate=None):
+		try:
+			url_params = {
+				'token': self.token,
+				'store_department_id': self.dep_id,
+				'sku': sku
+			}
+			
+			if parent_sku is not None:
+				url_params['parent_sku'] = parent_sku
+			if name is not None:
+				url_params['name'] = name
+			if pic is not None:
+				url_params['pic'] = pic
+			if points_rate is not None:
+				url_params['points_rate'] = points_rate
+			
+			url_params = encode(url_params)
+			
+			request = "%s/api/v2/basket/categories/add/?%s" % (self.sailplay_domain, url_params)
+			
+			data = open(request).read().decode("utf-8")
+			response_json = json.loads(data)
+			
+			if response_json[u'status'] == u'ok':
+				logging.info("products_categories_add: [%s] product category added [%s]" % (points, request))
+				return response_json
+			else:
+				logging.error("products_categories_add: Error: [%s] product category not added: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		except Exception as e:
+			logging.critical("products_categories_add: Exception: [%s]" % e)
+			return False
+		
+	def products_categories_edit(self, sku, parent_sku=None, name=None, pic=None, points_rate=None):
+		try:
+			url_params = {
+				'token': self.token,
+				'store_department_id': self.dep_id,
+				'sku': sku
+			}
+			
+			if parent_sku is not None:
+				url_params['parent_sku'] = parent_sku
+			if name is not None:
+				url_params['name'] = name
+			if pic is not None:
+				url_params['pic'] = pic
+			if points_rate is not None:
+				url_params['points_rate'] = points_rate
+			
+			url_params = encode(url_params)
+			
+			request = "%s/api/v2/basket/categories/edit/?%s" % (self.sailplay_domain, url_params)
+			
+			data = open(request).read().decode("utf-8")
+			response_json = json.loads(data)
+			
+			if response_json[u'status'] == u'ok':
+				logging.info("products_categories_edit: [%s] product category edited [%s]" % (points, request))
+				return response_json
+			else:
+				logging.error("products_categories_edit: Error: [%s] product category not edited: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		except Exception as e:
+			logging.critical("products_categories_edit: Exception: [%s]" % e)
 			return False
 		
 	#Convert a dictionary of the form {sku: {quantity, price}, sku: {quantity, price}, ...} into a valid cart string
