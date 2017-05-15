@@ -31,6 +31,7 @@ class api_connector(object):
 				"sp_api_connector: login: failure: [%s: %s] " % (response_json[u'status'], response_json[u'message']))
 			return False
 	
+	# method is of the form "/api/vX/path/to/method", params are a dictionary
 	def api_call(self, method, params):
 		try:
 			url_params = {
@@ -341,7 +342,139 @@ class api_connector(object):
 			logging.critical("points_add: Exception: [%s]" % e)
 			return False
 		
-	#Convert a dictionart of the form {sku: {sku, quantity, price}, sku: {sku, quantity, price}, ...} into a valid cart string
+	def products_add(self, sku, name=None, price=None, category_sku=None, points_rate=None):
+		try:
+			url_params = {
+				'token': self.token,
+				'store_department_id': self.dep_id,
+				'sku': sku
+			}
+			
+			if name is not None:
+				url_params['name'] = name
+			elif phone is not None:
+				url_params['price'] = price
+			elif email is not None:
+				url_params['category_sku'] = category_sku
+			if comment is not None:
+				url_params['points_rate'] = points_rate
+			
+			url_params = encode(url_params)
+			
+			request = "%s/api/v2/basket/products/add/?%s" % (self.sailplay_domain, url_params)
+			
+			data = open(request).read().decode("utf-8")
+			response_json = json.loads(data)
+			
+			if response_json[u'status'] == u'ok':
+				logging.info("products_add: [%s] product added [%s]" % (points, request))
+				return response_json
+			else:
+				logging.error("products_add: Error: [%s] product not added: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		except Exception as e:
+			logging.critical("products_add: Exception: [%s]" % e)
+			return False
+		
+	def products_edit(self, sku, name=None, price=None, category_sku=None, points_rate=None):
+		try:
+			url_params = {
+				'token': self.token,
+				'store_department_id': self.dep_id,
+				'sku': sku
+			}
+			
+			if name is not None:
+				url_params['name'] = name
+			elif phone is not None:
+				url_params['price'] = price
+			elif email is not None:
+				url_params['category_sku'] = category_sku
+			if comment is not None:
+				url_params['points_rate'] = points_rate
+			
+			url_params = encode(url_params)
+			
+			request = "%s/api/v2/basket/products/edit/?%s" % (self.sailplay_domain, url_params)
+			
+			data = open(request).read().decode("utf-8")
+			response_json = json.loads(data)
+			
+			if response_json[u'status'] == u'ok':
+				logging.info("products_edit: [%s] product edited [%s]" % (points, request))
+				return response_json
+			else:
+				logging.error("products_edit: Error: [%s] product not edited: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		except Exception as e:
+			logging.critical("products_edit: Exception: [%s]" % e)
+			return False
+		
+	def products_attributes_add(self, sku, attribute_sku, value_sku):
+		try:
+			url_params = {
+				'token': self.token,
+				'store_department_id': self.dep_id,
+				'sku': sku,
+				'attribute_sku': attribute_sku,
+				'value_sku': value_sku
+			}
+			
+			
+			url_params = encode(url_params)
+			
+			request = "%s/api/v2/basket/products/attributes/add/?%s" % (self.sailplay_domain, url_params)
+			
+			data = open(request).read().decode("utf-8")
+			response_json = json.loads(data)
+			
+			if response_json[u'status'] == u'ok':
+				logging.info("products_attributes_add: [%s] product attribute added [%s]" % (points, request))
+				return response_json
+			else:
+				logging.error("products_attributes_add: Error: [%s] product attribute not added: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		except Exception as e:
+			logging.critical("products_attributes_add: Exception: [%s]" % e)
+			return False
+		
+	def products_attributes_edit(selfsku, attribute_sku, value_sku_from, value_sku_to):
+		try:
+			url_params = {
+				'token': self.token,
+				'store_department_id': self.dep_id,
+				'sku': sku,
+				'attribute_sku': attribute_sku,
+				'value_sku_from': value_sku_from,
+				'value_sku_to': value_sku_to
+			}
+			
+			url_params = encode(url_params)
+			
+			request = "%s/api/v2/basket/products/attributes/edit/?%s" % (self.sailplay_domain, url_params)
+			
+			data = open(request).read().decode("utf-8")
+			response_json = json.loads(data)
+			
+			if response_json[u'status'] == u'ok':
+				logging.info("products_attributes_edit: [%s] product attribute edited [%s]" % (points, request))
+				return response_json
+			else:
+				logging.error("products_attributes_edit: Error: [%s] product attribute not edited: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		except Exception as e:
+			logging.critical("products_attributes_edit: Exception: [%s]" % e)
+			return False
+		
+	#Convert a dictionary of the form {sku: {quantity, price}, sku: {quantity, price}, ...} into a valid cart string
 	def to_cart(self, cart_dict):
 		index = 1
 		cart_string = "{"
