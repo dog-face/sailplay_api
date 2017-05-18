@@ -31,27 +31,28 @@ class api_connector(object):
 				"sp_api_connector: login: failure: [%s: %s] " % (response_json[u'status'], response_json[u'message']))
 			return False
 	
-	# method is of the form "/api/vX/path/to/method", params are a dictionary
-	def api_call(self, method, params):
+	# method is of the form "/api/vX/path/to/method/", params are a dictionary
+	def api_call(self, method, params, internal=False):
 		try:
-			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id
-			}
+			url_params = params
 			
-			for param in params:
-				url_params[param] = params[param]
+			# add token and dep id
+			url_params['token'] = self.token
+			url_params['store_department_id'] = self.dep_id
 			
 			url_params = encode(url_params)
 			
 			request = "%s%s?%s" % (self.sailplay_domain, method, url_params)
 			data = open(request).read().decode("utf-8")
 			response_json = json.loads(data)
+			if internal:
+				return request, response_json
+			
 			if response_json[u'status'] == u'ok':
 				logging.info("api_call: success: [%s] " % request)
 				return response_json
 			else:
-				logging.error("api_call: Error: [%s] not found: [%s: %s]" %
+				logging.error("api_call: Error: [%s] [%s: %s]" %
 							  (request, response_json[u'status'], response_json[u'message']))
 				return False
 		except Exception as e:
@@ -60,10 +61,7 @@ class api_connector(object):
 	
 	def users_info(self, origin_user_id=None, phone=None, email=None):
 		try:
-			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
-			}
+			url_params = {}
 			if origin_user_id is not None:
 				url_params['origin_user_id'] = origin_user_id
 			elif email is not None:
@@ -73,9 +71,7 @@ class api_connector(object):
 			
 			url_params = encode(url_params)
 			
-			request = "%s/api/v2/users/info/?%s" % (self.sailplay_domain, url_params)
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+			request, response_json = self.api_call("/api/v2/users/info/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
 				logging.info("users_info: [%s] found" % request)
@@ -92,11 +88,7 @@ class api_connector(object):
 				  birth_date=None, sex=None):
 		try:
 			
-			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
-				'origin_user_id': origin_user_id,
-			}
+			url_params = {}
 			
 			if origin_user_id is not None:
 				url_params['origin_user_id'] = origin_user_id
@@ -115,12 +107,7 @@ class api_connector(object):
 			if sex is not None:
 				url_params['sex'] = sex
 			
-			url_params = encode(url_params)
-			
-			request = "%s/api/v2/users/add/?%s" % (self.sailplay_domain, url_params)
-			
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+			request, response_json = self.api_call("/api/v2/users/add/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
 				logging.info("users_add: created [%s]" % request)
@@ -138,11 +125,7 @@ class api_connector(object):
 				  birth_date=None, sex=None, add_phone=None, add_email=None, new_phone=None, new_email= None):
 		try:
 			
-			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
-				'origin_user_id': origin_user_id,
-			}
+			url_params = {}
 			
 			if origin_user_id is not None:
 				url_params['origin_user_id'] = origin_user_id
@@ -169,12 +152,7 @@ class api_connector(object):
 			if new_email is not None:
 				url_params['new_email'] = new_email
 			
-			url_params = encode(url_params)
-			
-			request = "%s/api/v2/users/update/?%s" % (self.sailplay_domain, url_params)
-			
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+			request, response_json = self.api_call("/api/v2/users/update/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
 				logging.info("users_update: updated [%s]" % request)
@@ -192,11 +170,7 @@ class api_connector(object):
 	#  Provide tags as a list
 	def users_tags_add(self, tags, origin_user_id=None, phone=None, email=None, language=None):
 		try:
-			
 			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
-				'origin_user_id': origin_user_id,
 				'tags': ",".join(tags)
 			}
 			
@@ -209,12 +183,7 @@ class api_connector(object):
 			if language is not None:
 				url_params['language'] = language
 			
-			url_params = encode(url_params)
-			
-			request = "%s/api/v2/users/tags/add/?%s" % (self.sailplay_domain, url_params)
-			
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+			request, response_json = self.api_call("/api/v2/users/tags/add/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
 				logging.info("users_tags_add: updated [%s]" % request)
@@ -233,8 +202,6 @@ class api_connector(object):
 		try:
 			
 			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
 				'tags': ",".join(tags)
 			}
 			
@@ -247,12 +214,7 @@ class api_connector(object):
 			if language is not None:
 				url_params['language'] = language
 			
-			url_params = encode(url_params)
-			
-			request = "%s/api/v2/users/tags/delete/?%s" % (self.sailplay_domain, url_params)
-			
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+			request, response_json = self.api_call("/api/v2/users/tags/delete/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
 				logging.info("users_tags_delete: updated [%s]" % request)
@@ -270,8 +232,6 @@ class api_connector(object):
 	def purchases_new(self, order_num, cart, origin_user_id=None, phone=None, email=None):
 		try:
 			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
 				'pin_code': self.pin_code,
 				'order_num': order_num,
 				'cart': cart
@@ -283,13 +243,8 @@ class api_connector(object):
 				url_params['phone'] = phone
 			elif email is not None:
 				url_params['email'] = email
-			
-			url_params = encode(url_params)
-			
-			request = "%s/api/v2/purchases/new/?%s" % (self.sailplay_domain, url_params)
-			
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+
+			request, response_json = self.api_call("/api/v2/purchases/new/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
 				logging.info("purchases_new: [%s] purchase added [%s]" % (order_num, request))
@@ -307,8 +262,6 @@ class api_connector(object):
 	def points_add(self, points, origin_user_id=None, phone=None, email=None, comment=None, order_num=None):
 		try:
 			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
 				'points': points
 			}
 			
@@ -323,12 +276,7 @@ class api_connector(object):
 			if order_num is not None:
 				url_params['order_num'] = order_num
 			
-			url_params = encode(url_params)
-			
-			request = "%s/api/v2/points/add/?%s" % (self.sailplay_domain, url_params)
-			
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+			request, response_json = self.api_call("/api/v2/points/add/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
 				logging.info("points_add: [%s] points added [%s]" % (points, request))
@@ -345,8 +293,6 @@ class api_connector(object):
 	def products_add(self, sku, name=None, price=None, category_sku=None, points_rate=None):
 		try:
 			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
 				'sku': sku
 			}
 			
@@ -359,15 +305,10 @@ class api_connector(object):
 			if points_rate is not None:
 				url_params['points_rate'] = points_rate
 			
-			url_params = encode(url_params)
-			
-			request = "%s/api/v2/basket/products/add/?%s" % (self.sailplay_domain, url_params)
-			
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+			request, response_json = self.api_call("/api/v2/basket/products/add/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
-				logging.info("products_add: [%s] product added [%s]" % (points, request))
+				logging.info("products_add: [%s] product added [%s]" % (sku, request))
 				return response_json
 			else:
 				logging.error("products_add: Error: [%s] product not added: [%s: %s]" % (
@@ -381,8 +322,6 @@ class api_connector(object):
 	def products_edit(self, sku, name=None, price=None, category_sku=None, points_rate=None):
 		try:
 			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
 				'sku': sku
 			}
 			
@@ -395,15 +334,10 @@ class api_connector(object):
 			if points_rate is not None:
 				url_params['points_rate'] = points_rate
 			
-			url_params = encode(url_params)
-			
-			request = "%s/api/v2/basket/products/edit/?%s" % (self.sailplay_domain, url_params)
-			
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+			request, response_json = self.api_call("/api/v2/basket/products/edit/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
-				logging.info("products_edit: [%s] product edited [%s]" % (points, request))
+				logging.info("products_edit: [%s] product edited [%s]" % (sku, request))
 				return response_json
 			else:
 				logging.error("products_edit: Error: [%s] product not edited: [%s: %s]" % (
@@ -417,22 +351,15 @@ class api_connector(object):
 	def products_attributes_add(self, sku, attribute_sku, value_sku):
 		try:
 			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
 				'sku': sku,
 				'attribute_sku': attribute_sku,
 				'value_sku': value_sku
 			}
 			
-			url_params = encode(url_params)
-			
-			request = "%s/api/v2/basket/products/attributes/add/?%s" % (self.sailplay_domain, url_params)
-			
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+			request, response_json = self.api_call("/api/v2/basket/products/attributes/add/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
-				logging.info("products_attributes_add: [%s] product attribute added [%s]" % (points, request))
+				logging.info("products_attributes_add: [%s] product attribute added [%s]" % (sku, request))
 				return response_json
 			else:
 				logging.error("products_attributes_add: Error: [%s] product attribute not added: [%s: %s]" % (
@@ -443,26 +370,19 @@ class api_connector(object):
 			logging.critical("products_attributes_add: Exception: [%s]" % e)
 			return False
 		
-	def products_attributes_edit(selfsku, attribute_sku, value_sku_from, value_sku_to):
+	def products_attributes_edit(self, sku, attribute_sku, value_sku_from, value_sku_to):
 		try:
 			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
 				'sku': sku,
 				'attribute_sku': attribute_sku,
 				'value_sku_from': value_sku_from,
 				'value_sku_to': value_sku_to
 			}
 			
-			url_params = encode(url_params)
-			
-			request = "%s/api/v2/basket/products/attributes/edit/?%s" % (self.sailplay_domain, url_params)
-			
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+			request, response_json = self.api_call("/api/v2/basket/products/attributes/edit/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
-				logging.info("products_attributes_edit: [%s] product attribute edited [%s]" % (points, request))
+				logging.info("products_attributes_edit: [%s] product attribute edited [%s]" % (sku, request))
 				return response_json
 			else:
 				logging.error("products_attributes_edit: Error: [%s] product attribute not edited: [%s: %s]" % (
@@ -476,8 +396,6 @@ class api_connector(object):
 	def products_categories_add(self, sku, parent_sku=None, name=None, pic=None, points_rate=None):
 		try:
 			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
 				'sku': sku
 			}
 			
@@ -490,15 +408,10 @@ class api_connector(object):
 			if points_rate is not None:
 				url_params['points_rate'] = points_rate
 			
-			url_params = encode(url_params)
-			
-			request = "%s/api/v2/basket/categories/add/?%s" % (self.sailplay_domain, url_params)
-			
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+			request, response_json = self.api_call("/api/v2/basket/categories/add/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
-				logging.info("products_categories_add: [%s] product category added [%s]" % (points, request))
+				logging.info("products_categories_add: [%s] product category added [%s]" % (sku, request))
 				return response_json
 			else:
 				logging.error("products_categories_add: Error: [%s] product category not added: [%s: %s]" % (
@@ -512,8 +425,6 @@ class api_connector(object):
 	def products_categories_edit(self, sku, parent_sku=None, name=None, pic=None, points_rate=None):
 		try:
 			url_params = {
-				'token': self.token,
-				'store_department_id': self.dep_id,
 				'sku': sku
 			}
 			
@@ -525,16 +436,11 @@ class api_connector(object):
 				url_params['pic'] = pic
 			if points_rate is not None:
 				url_params['points_rate'] = points_rate
-			
-			url_params = encode(url_params)
-			
-			request = "%s/api/v2/basket/categories/edit/?%s" % (self.sailplay_domain, url_params)
-			
-			data = open(request).read().decode("utf-8")
-			response_json = json.loads(data)
+	
+			request, response_json = self.api_call("/api/v2/basket/categories/edit/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
-				logging.info("products_categories_edit: [%s] product category edited [%s]" % (points, request))
+				logging.info("products_categories_edit: [%s] product category edited [%s]" % (sku, request))
 				return response_json
 			else:
 				logging.error("products_categories_edit: Error: [%s] product category not edited: [%s: %s]" % (
