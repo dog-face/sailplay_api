@@ -11,3 +11,4 @@ setup(name='sailplay_api',
 	  install_requires=[
 	  ],
 	  zip_safe=False)
+
