@@ -451,6 +451,89 @@ class api_connector(object):
 			logging.critical("products_categories_edit: Exception: [%s]" % e)
 			return False
 		
+	# vars as dictionary {key:value, key:value, ...}
+	def users_custom_vars_add(self, vars, origin_user_id=None, phone=None, email=None):
+		try:
+			url_params = {
+				'vars': vars,
+			}
+			
+			if origin_user_id is not None:
+				url_params['origin_user_id'] = origin_user_id
+			elif phone is not None:
+				url_params['phone'] = phone
+			elif email is not None:
+				url_params['email'] = email
+			
+			request, response_json = self.api_call("/api/v2/users/custom-vars/add/", url_params, internal=True)
+			
+			if response_json[u'status'] == u'ok':
+				logging.info("users_custom_vars_add: [%s] custom vars added[%s]" % (vars, request))
+				return response_json
+			else:
+				logging.error("users_custom_vars_add: Error: [%s] custom vars not added: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		except Exception as e:
+			logging.critical("users_custom_vars_add: Exception: [%s]" % e)
+			return False
+			
+	def users_custom_vars_get(self, name, origin_user_id=None, phone=None, email=None):
+		try:
+			url_params = {
+				'name': name,
+			}
+			
+			if origin_user_id is not None:
+				url_params['origin_user_id'] = origin_user_id
+			elif phone is not None:
+				url_params['phone'] = phone
+			elif email is not None:
+				url_params['email'] = email
+			
+			request, response_json = self.api_call("/api/v2/users/custom-vars/get/", url_params, internal=True)
+			
+			if response_json[u'status'] == u'ok':
+				value = str(response_json[u'value'])
+				logging.info("users_custom_vars_get: [%s : %s] custom var retrieved [%s]" % (name, value, request))
+				return value
+			else:
+				logging.error("users_custom_vars_get: Error: [%s] custom var not retrieved: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		except Exception as e:
+			logging.critical("users_custom_vars_get: Exception: [%s]" % e)
+			return False
+		
+	def users_custom_vars_list(self, origin_user_id=None, phone=None, email=None):
+		try:
+			url_params = {}
+			
+			if origin_user_id is not None:
+				url_params['origin_user_id'] = origin_user_id
+			elif phone is not None:
+				url_params['phone'] = phone
+			elif email is not None:
+				url_params['email'] = email
+			
+			request, response_json = self.api_call("/api/v2/users/custom-vars/list/", url_params, internal=True)
+			
+			if response_json[u'status'] == u'ok':
+				vars = str(response_json[u'custom_vars'])
+				logging.info("users_custom_vars_list: [%s] custom vars retrieved [%s]" % (vars, request))
+				return vars
+			else:
+				logging.error("users_custom_vars_list: Error: [%s] custom vars not retrieved: [%s: %s]" % (
+					request, response_json[u'status'], response_json[u'message']))
+				return False
+		
+		except Exception as e:
+			logging.critical("users_custom_vars_list: Exception: [%s]" % e)
+			return False
+	
+		
 	#Convert a dictionary of the form {sku: {quantity, price}, sku: {quantity, price}, ...} into a valid cart string
 	def to_cart(self, cart_dict):
 		index = 1
