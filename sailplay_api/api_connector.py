@@ -454,8 +454,9 @@ class api_connector(object):
 	# vars as dictionary {key:value, key:value, ...}
 	def users_custom_vars_add(self, vars, origin_user_id=None, phone=None, email=None):
 		try:
+			vars_json = json.dumps(vars)
 			url_params = {
-				'vars': vars,
+				'vars': vars_json,
 			}
 			
 			if origin_user_id is not None:
