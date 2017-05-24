@@ -68,9 +68,7 @@ class api_connector(object):
 				url_params['email'] = email
 			elif phone is not None:
 				url_params['phone'] = phone
-			
-			url_params = encode(url_params)
-			
+						
 			request, response_json = self.api_call("/api/v2/users/info/", url_params, internal=True)
 			
 			if response_json[u'status'] == u'ok':
